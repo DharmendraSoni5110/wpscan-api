@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: wpscan-api
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn wpscan_api:app
