@@ -19,9 +19,15 @@ def scan():
 
     try:
         # ✅ Build base WPScan command
-        cmd = ["wpscan", "--url", url, "--no-update", "--format", "json"]
+        cmd = [
+            "wpscan",
+            "--url", url,
+            "--no-update",
+            "--format", "json",
+            "--force",
+            "--random-user-agent"
+        ]
 
-        # ✅ Add enumeration type
         if scan_type == "plugins":
             cmd += ["--enumerate", "vp"]
         elif scan_type == "themes":
@@ -29,7 +35,6 @@ def scan():
         elif scan_type == "users":
             cmd += ["--enumerate", "u"]
 
-        # ✅ Pass API token if provided
         if token:
             cmd += ["--api-token", token]
 
