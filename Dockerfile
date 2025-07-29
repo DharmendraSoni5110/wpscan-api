@@ -33,4 +33,5 @@ RUN python3 -m venv venv && \
     pip install -r requirements.txt
 
 # Start app using gunicorn from the virtualenv
-CMD ["venv/bin/gunicorn", "app:app", "--bind", "0.0.0.0:10000"]
+CMD ["gunicorn", "app:app", "--bind", "0.0.0.0:10000", "--timeout", "700"]
+
