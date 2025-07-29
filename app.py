@@ -1,4 +1,3 @@
-
 from flask import Flask, request, jsonify
 import subprocess
 
@@ -13,13 +12,16 @@ def scan():
     data = request.json
     url = data.get("url")
     scan_type = data.get("type", "all")
+    token = data.get("token")  # ✅ get the API token
 
     if not url:
         return jsonify({"error": "Missing 'url' in request"}), 400
 
     try:
+        # ✅ Build base WPScan command
         cmd = ["wpscan", "--url", url, "--no-update", "--format", "json"]
 
+        # ✅ Add enumeration type
         if scan_type == "plugins":
             cmd += ["--enumerate", "vp"]
         elif scan_type == "themes":
@@ -27,7 +29,13 @@ def scan():
         elif scan_type == "users":
             cmd += ["--enumerate", "u"]
 
-        result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
+        # ✅ Pass API token if provided
+        if token:
+            cmd += ["--api-token", token]
+
+        # ✅ Run the scan
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
+
         return jsonify({
             "stdout": result.stdout,
             "stderr": result.stderr,
