@@ -19,6 +19,9 @@ RUN apt update && apt install -y \
 # Install WPScan
 RUN gem install wpscan
 
+# Update WPScan vulnerability database
+RUN wpscan --update || true
+
 # Create and activate a virtual environment
 WORKDIR /app
 COPY . .
