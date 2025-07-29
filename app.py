@@ -3,27 +3,39 @@ import subprocess
 
 app = Flask(__name__)
 
+@app.route("/")
+def index():
+    return "WPScan API is live!"
+
 @app.route("/scan", methods=["POST"])
 def scan():
     data = request.get_json()
     url = data.get("url")
-    scan_type = data.get("type", "all")
-    token = data.get("token")
+    scan_type = data.get("type", "plugins")
+    token = data.get("token")  # optional, or used if you have WPScan API token
 
-    if not url or not token:
-        return jsonify({"error": "Missing required parameters"}), 400
+    if not url:
+        return jsonify({"error": "Missing target URL"}), 400
 
-    # Fake command for now — replace with your actual WPScan command if needed
-    output = f"Scanning {url} with scan type: {scan_type}"
+    cmd = ["wpscan", "--url", url]
 
-    return jsonify({
-        "target": url,
-        "type": scan_type,
-        "result": output,
-        "token": token
-    })
+    if scan_type == "plugins":
+        cmd += ["--enumerate", "vp"]
+    elif scan_type == "themes":
+        cmd += ["--enumerate", "vt"]
+    elif scan_type == "users":
+        cmd += ["--enumerate", "u"]
 
-@app.route("/", methods=["GET"])
-def index():
-    return "WPScan API is live", 200
+    if token:
+        cmd += ["--api-token", token]
 
+    try:
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=180)
+        return jsonify({
+            "target": url,
+            "output": result.stdout,
+            "errors": result.stderr,
+            "returncode": result.returncode
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
